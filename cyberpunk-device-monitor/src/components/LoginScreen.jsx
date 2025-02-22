@@ -17,7 +17,15 @@ const Container = styled.div`
   color: #0ff;
   font-family: "Courier New", monospace;
 `;
-
+const ErrorMessage = styled.div`
+  color: #ff0000;
+  background-color: rgba(255, 0, 0, 0.1);
+  border: 1px solid #ff0000;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 3px;
+  font-size: 0.9em;
+`;
 const glitch = keyframes`
   0% {
     transform: translate(0);
@@ -75,11 +83,13 @@ const GlitchText = styled.h1`
 const LoginScreen = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
       const response = await fetch("http://localhost:8080/api/auth/login", {
@@ -90,16 +100,22 @@ const LoginScreen = () => {
         body: JSON.stringify({ username, password }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
-        dispatch(loginSuccess({ username: data.username, token: data.token }));
+        dispatch(loginSuccess({ 
+          username: data.username, 
+          token: data.token 
+        }));
         navigate("/monitor");
       } else {
-        dispatch(loginFailure("Invalid credentials"));
+        setError(data.message || "Invalid credentials");
+        dispatch(loginFailure(data.message || "Invalid credentials"));
       }
     } catch (error) {
-      console.error(error);
-      dispatch(loginFailure("An error occurred"));
+      console.error("Login error:", error);
+      setError("Connection error. Please try again.");
+      dispatch(loginFailure("Connection error"));
     }
   };
 
@@ -107,6 +123,7 @@ const LoginScreen = () => {
     <Container>
       <LoginForm onSubmit={handleSubmit}>
         <GlitchText>Login</GlitchText>
+        {error && <ErrorMessage>{error}</ErrorMessage>}
         <div>
           <label htmlFor="username">Username:</label>
           <Input
@@ -114,6 +131,7 @@ const LoginScreen = () => {
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            required
           />
         </div>
         <div>
@@ -123,6 +141,7 @@ const LoginScreen = () => {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
         <Button type="submit">Login</Button>
