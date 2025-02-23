@@ -1,27 +1,31 @@
-// LoginScreen.jsx
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginSuccess, loginFailure } from "../features/auth/authSlice";
 import { loginUser } from "../services/api";
 import styled from "styled-components";
+import backgroundImage from '../assets/AVEARBackGround.jpg';
+
 
 const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #1a1a1a;
+  background-image: url(${backgroundImage});
+  background-size: cover;
+  background-position: center;
 `;
 
 const LoginForm = styled.form`
-  background-color: #2a2a2a;
+  // background-color: #2a2a2a;  // Remove the background color for the form
   padding: 2rem;
   border-radius: 8px;
   width: 100%;
   max-width: 400px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 `;
+
 
 const Title = styled.h1`
   color: #ffffff;
@@ -78,7 +82,7 @@ const ErrorMessage = styled.div`
 
 const LinkButton = styled(Button)`
   background-color: #666;
-  
+
   &:hover {
     background-color: #555;
   }
@@ -96,7 +100,7 @@ const LoginScreen = () => {
 
   const handleChange = (e) => {
     setFormData({
-      ...formData,
+    ...formData,
       [e.target.name]: e.target.value
     });
   };
@@ -105,14 +109,14 @@ const LoginScreen = () => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-  
+
     try {
       const data = await loginUser(formData);
       if (data.token) {
         localStorage.setItem("token", data.token);
-        dispatch(loginSuccess({ 
-          username: data.username, 
-          token: data.token 
+        dispatch(loginSuccess({
+          username: data.username,
+          token: data.token
         }));
         navigate("/monitor");
       } else {
@@ -152,7 +156,7 @@ const LoginScreen = () => {
             required
           />
         </div>
-        <Button type="submit" disabled={isLoading}>{isLoading ? "Logging in..." : "Login"}</Button>
+        <Button type="submit" disabled={isLoading}>{isLoading? "Logging in...": "Login"}</Button>
         <LinkButton type="button" onClick={() => navigate("/register")}>
           Register
         </LinkButton>

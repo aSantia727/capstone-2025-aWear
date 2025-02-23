@@ -10,6 +10,19 @@ const Frame = styled.div`
   margin: 50px auto;
   background-color: #111;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border-radius: 30px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+    z-index: -1;
+  }
 `;
 
 const Notch = styled.div`
@@ -28,7 +41,7 @@ const Content = styled.div`
   height: 100%;
   overflow: hidden;
   border-radius: 30px;
-  background-size: cover;
+  background-color: transparent!important; // Ensure the content area is transparent
 `;
 
 const PhoneFrame = ({ children }) => {

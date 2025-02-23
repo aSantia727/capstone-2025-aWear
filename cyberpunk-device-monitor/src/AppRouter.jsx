@@ -12,21 +12,21 @@ const AppRouter = () => {
       <Routes>
         <Route path="/" element={<LoginScreen />} />
         <Route path="/register" element={<Register />} />
-        <Route 
-          path="/monitor" 
+        <Route
+          path="/monitor"
           element={
             <PrivateRoute>
               <DeviceMonitor />
             </PrivateRoute>
-          } 
+          }
         />
-        <Route 
-          path="/settings" 
+        <Route
+          path="/settings"
           element={
             <PrivateRoute>
               <SettingsScreen />
             </PrivateRoute>
-          } 
+          }
         />
       </Routes>
     </BrowserRouter>
