@@ -1,11 +1,26 @@
+// GlobalStyles.js
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
   body {
     margin: 0;
-    font-family: sans-serif;
-    background-color: #222; /* Example dark background */
-    color: #eee; /* Example light text color */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+
+  #root {
+    min-height: 100vh;
   }
 `;
 

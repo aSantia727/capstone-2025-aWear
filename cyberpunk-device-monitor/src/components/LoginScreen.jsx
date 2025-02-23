@@ -1,151 +1,161 @@
+// LoginScreen.jsx
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginSuccess, loginFailure } from "../features/auth/authSlice";
-import styled, { keyframes } from "styled-components";
-import loginBackgroundImage from "../assets/AVEARBackGround.jpg";
+import { loginUser } from "../services/api";
+import styled from "styled-components";
 
 const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-image: url(${loginBackgroundImage});
-  background-size: 30% auto;
-  background-position: center center;
-  background-attachment: fixed;
-  color: #0ff;
-  font-family: "Courier New", monospace;
-`;
-const ErrorMessage = styled.div`
-  color: #ff0000;
-  background-color: rgba(255, 0, 0, 0.1);
-  border: 1px solid #ff0000;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 3px;
-  font-size: 0.9em;
-`;
-const glitch = keyframes`
-  0% {
-    transform: translate(0);
-  }
-  20% {
-    transform: translate(-2px, 2px);
-  }
-  40% {
-    transform: translate(-2px, -2px);
-  }
-  60% {
-    transform: translate(2px, 2px);
-  }
-  80% {
-    transform: translate(2px, -2px);
-  }
-  to {
-    transform: translate(0);
-  }
+  min-height: 100vh;
+  background-color: #1a1a1a;
 `;
 
 const LoginForm = styled.form`
-  background-color: transparent;
-  padding: 30px;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  background-color: #2a2a2a;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+`;
+
+const Title = styled.h1`
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  text-align: center;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #555;
-  border-radius: 3px;
-  background-color: #444;
-  color: #eee;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  background-color: #333;
+  color: white;
+  font-size: 1rem;
+
+  &:focus {
+    outline: none;
+    border-color: #4a90e2;
+  }
 `;
 
 const Button = styled.button`
-  background-color: #007bff;
-  color: white;
-  padding: 10px 15px;
+  width: 100%;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
+  background-color: #4a90e2;
+  color: white;
+  font-size: 1rem;
   cursor: pointer;
-  margin: 5px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #357abd;
+  }
+
+  &:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+  }
 `;
 
-const GlitchText = styled.h1`
-  animation: ${glitch} 0.5s infinite;
-  color: #0ff;
-  text-shadow: 0 0 5px #0ff;
+const ErrorMessage = styled.div`
+  color: #ff4444;
+  background-color: rgba(255, 68, 68, 0.1);
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+  text-align: center;
+`;
+
+const LinkButton = styled(Button)`
+  background-color: #666;
+  
+  &:hover {
+    background-color: #555;
+  }
 `;
 
 const LoginScreen = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
+    setIsLoading(true);
+  
     try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      const data = await loginUser(formData);
+      if (data.token) {
+        localStorage.setItem("token", data.token);
         dispatch(loginSuccess({ 
           username: data.username, 
           token: data.token 
         }));
         navigate("/monitor");
       } else {
-        setError(data.message || "Invalid credentials");
-        dispatch(loginFailure(data.message || "Invalid credentials"));
+        throw new Error('No token received');
       }
     } catch (error) {
       console.error("Login error:", error);
-      setError("Connection error. Please try again.");
-      dispatch(loginFailure("Connection error"));
+      setError(error.message || "Login failed. Please try again.");
+      dispatch(loginFailure(error.message));
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Container>
       <LoginForm onSubmit={handleSubmit}>
-        <GlitchText>Login</GlitchText>
+        <Title>Login</Title>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <div>
-          <label htmlFor="username">Username:</label>
           <Input
             type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            name="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
             required
           />
         </div>
         <div>
-          <label htmlFor="password">Password:</label>
           <Input
             type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
             required
           />
         </div>
-        <Button type="submit">Login</Button>
-        <Button type="button" onClick={() => navigate('/register')}>Register</Button>
+        <Button type="submit" disabled={isLoading}>{isLoading ? "Logging in..." : "Login"}</Button>
+        <LinkButton type="button" onClick={() => navigate("/register")}>
+          Register
+        </LinkButton>
       </LoginForm>
     </Container>
   );
